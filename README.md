@@ -1,5 +1,7 @@
 # Django-DALLE-linebot-Render
 # 一個使用Django框架和圖像生成AI DALLE，創造一個linebot的專案，快速建置於平台Render。
+# 源於pyfbsdk59/Django-DALLE-linebot-Render https://github.com/pyfbsdk59/Django-DALLE-linebot-Render
+# 修改更新至可使用
 
 
 <div align="center">
