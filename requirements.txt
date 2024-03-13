@@ -1,4 +1,4 @@
 line-bot-sdk
 Django
-openai
+openai==0.28
 gunicorn
