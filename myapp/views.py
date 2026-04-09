@@ -28,6 +28,7 @@ class Dalle:
         #import openai
         #openai.api_key = openai.api_key
         response = openai.Image.create(
+			model="gpt-image-1-mini"
             prompt = user_input,
                 n=1,
             size="1024x1024"
