@@ -1,4 +1,4 @@
 line-bot-sdk==1.8.0
-Django
+Django==3.2.25
 openai==0.27.0
-gunicorn
+gunicorn==25.0.0
