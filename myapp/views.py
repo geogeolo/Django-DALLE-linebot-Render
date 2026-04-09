@@ -1,87 +1,93 @@
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
-from linebot import LineBotApi, WebhookParser, WebhookHandler
+
+from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage
-from linebot.models import ImageSendMessage
-from linebot.models import TextSendMessage
-import openai, os
+from linebot.models import MessageEvent, TextMessage, ImageSendMessage, TextSendMessage
+
+import openai
+import os
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 parser = WebhookParser(os.getenv("LINE_CHANNEL_SECRET"))
 
-	
 
-
-class Dalle:  
-    
-
-    def __init__(self):
-        
-        self.image_url = ""
-
-
-
-    def get_response(self, user_input):
-        #import openai
-        #openai.api_key = openai.api_key
+class DalleService:
+    def generate_image_url(self, prompt: str) -> str:
         response = openai.Image.create(
-			model="gpt-image-1-mini"
-            prompt = user_input,
-                n=1,
+            model="dall-e-3",
+            prompt=prompt,
+            n=1,
             size="1024x1024"
-            )
-        self.image_url = response['data'][0]['url'].strip()
-        print(self.image_url)
+        )
+        return response["data"][0]["url"].strip()
 
 
-        
-        return self.image_url
-	
+dalle_service = DalleService()
 
-
-
-dalle = Dalle()
 
 @csrf_exempt
 def callback(request):
-    if request.method == 'POST':
-        signature = request.META['HTTP_X_LINE_SIGNATURE']
-        body = request.body.decode('utf-8')
-        try:
-            events = parser.parse(body, signature)
-        except InvalidSignatureError:
-            return HttpResponseForbidden()
-        except LineBotApiError:
-            return HttpResponseBadRequest()
+    print("=== callback hit ===")
+    print("method:", request.method)
 
-        for event in events:
-            if isinstance(event, MessageEvent):
-                if isinstance(event.message, TextMessage):
-            ##############
-                    #user_message = event.message.text        
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST only")
 
-                                
-                    #reply_dalle_url = dalle.get_response(user_message="beautiful Taiwanese girl")
-                    reply_dalle_url = dalle.get_response(event.message.text)
+    signature = request.META.get("HTTP_X_LINE_SIGNATURE")
+    if not signature:
+        print("missing X-Line-Signature")
+        return HttpResponseForbidden("Missing signature")
 
+    body = request.body.decode("utf-8")
+    print("body:", body)
+
+    try:
+        events = parser.parse(body, signature)
+        print("events count:", len(events))
+    except InvalidSignatureError as e:
+        print("InvalidSignatureError:", str(e))
+        return HttpResponseForbidden("Invalid signature")
+    except LineBotApiError as e:
+        print("LineBotApiError:", str(e))
+        return HttpResponseBadRequest("Line API error")
+    except Exception as e:
+        print("Unexpected parse error:", str(e))
+        return HttpResponseBadRequest("Parse error")
+
+    # LINE Verify 時可能是 events=[]
+    if not events:
+        print("empty events -> return 200")
+        return HttpResponse("OK")
+
+    for event in events:
+        if isinstance(event, MessageEvent) and isinstance(event.message, TextMessage):
+            user_text = event.message.text.strip()
+            print("user_text:", user_text)
+
+            try:
+                image_url = dalle_service.generate_image_url(user_text)
+                print("image_url:", image_url)
+
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    ImageSendMessage(
+                        original_content_url=image_url,
+                        preview_image_url=image_url
+                    )
+                )
+
+            except Exception as e:
+                print("OpenAI or reply error:", str(e))
+                try:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        #TextSendMessage(text=reply_dalle_url)
-                        ImageSendMessage(original_content_url=reply_dalle_url, preview_image_url=reply_dalle_url)
-                        )
+                        TextSendMessage(text="圖片生成失敗，請稍後再試。")
+                    )
+                except Exception as reply_error:
+                    print("fallback reply error:", str(reply_error))
 
-
-            ##########################
-
-                     
-                                              
-                
-        return HttpResponse()
-
-    else:
-        return HttpResponseBadRequest()
-
-
+    return HttpResponse("OK")
