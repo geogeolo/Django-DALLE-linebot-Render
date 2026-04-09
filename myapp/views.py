@@ -18,9 +18,11 @@ parser = WebhookParser(os.getenv("CHANNEL_SECRET"))
 class DalleService:
     def generate_image_url(self, prompt: str) -> str:
         response = openai.Image.create(
+            model="dall-e-3",
             prompt=prompt,
             n=1,
-            size="1024x1024"
+            size="1024x1024",
+            response_format="url"
         )
         return response["data"][0]["url"].strip()
 
@@ -57,7 +59,6 @@ def callback(request):
         print("Unexpected parse error:", str(e))
         return HttpResponseBadRequest("Parse error")
 
-    # LINE Verify 時可能是 events=[]
     if not events:
         print("empty events -> return 200")
         return HttpResponse("OK")
@@ -80,13 +81,13 @@ def callback(request):
                 )
 
             except Exception as e:
-                print("OpenAI or reply error:", str(e))
+                print("OpenAI or reply error:", repr(e))
                 try:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text="圖片生成失敗，請稍後再試。")
+                        TextSendMessage(text=f"圖片生成失敗：{str(e)}")
                     )
                 except Exception as reply_error:
-                    print("fallback reply error:", str(reply_error))
+                    print("fallback reply error:", repr(reply_error))
 
     return HttpResponse("OK")
