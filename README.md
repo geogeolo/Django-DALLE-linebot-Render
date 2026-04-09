@@ -35,7 +35,7 @@ https://xxx.onrender.com/
   <img src="demo/demo3r1.png" width="700"/>
 </div>
 
-### 3. 注意Start Command要改為export PATH=$PATH:/usr/local/python3/bin && pip install gunicorn && gunicorn config.wsgi:application來啟動。
+### 3. 注意Start Command要改為 gunicorn config.wsgi:application 來啟動。
 
 
 
