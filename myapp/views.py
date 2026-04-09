@@ -11,8 +11,8 @@ import os
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-parser = WebhookParser(os.getenv("LINE_CHANNEL_SECRET"))
+line_bot_api = LineBotApi(os.getenv("CHANNEL_ACCESS_TOKEN"))
+parser = WebhookParser(os.getenv("CHANNEL_SECRET"))
 
 
 class DalleService:
