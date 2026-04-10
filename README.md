@@ -27,7 +27,10 @@
   <img src="demo/demo2r.png" width="700"/>
 </div>
 
-#### 2. 必須在Render的Environment Variables設定3個環境變數，分別是OPENAI_API_KEY和LINE_CHANNEL_SECRET和LINE_CHANNEL_ACCESS_TOKEN。然後開始部屬，可能要花上一些時間。成功後複製自己的URL貼到line developer的Webhook URL來做設定和測試。例如：
+#### 2. 必須在Render的Environment Variables設定3個環境變數，分別是OPENAI_API_KEY<img width="354" height="81" alt="image" src="https://github.com/user-attachments/assets/f10fb7bf-0531-4818-a264-f1015748e987" />
+和CHANNEL_SECRET<img width="382" height="81" alt="image" src="https://github.com/user-attachments/assets/5e804839-f558-43ea-8eba-01c67659aaad" />
+和CHANNEL_ACCESS_TOKEN<img width="528" height="81" alt="image" src="https://github.com/user-attachments/assets/4ca10f87-e200-4c57-8538-dc82f236b967" />
+。然後開始部屬，可能要花上一些時間。成功後複製自己的URL貼到line developer的Webhook URL來做設定和測試。例如：
 
 https://xxx.onrender.com/
 
